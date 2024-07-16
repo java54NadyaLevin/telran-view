@@ -50,31 +50,32 @@ public interface InputOutput {
 	}
 
 	default Long readLong(String prompt, String errorPrompt) {
-	
+
 		return (Long) readObject(prompt, errorPrompt, str -> {
 			Long longNumber = Long.parseLong(str);
-			return longNumber;});
+			return longNumber;
+		});
 
 	}
 
 	default Double readDouble(String prompt, String errorPrompt) {
 		return (Double) readObject(prompt, errorPrompt, str -> {
 			Double doubleNumber = Double.parseDouble(str);
-			return doubleNumber;});
+			return doubleNumber;
+		});
 
 	}
 
 	default Double readNumberRange(String prompt, String errorPrompt, double min, double max) {
 		return (Double) readObject(prompt, errorPrompt, str -> {
 			Double doubleNumber = Double.parseDouble(str);
-			return doubleNumber != null 
-					&& doubleNumber.compareTo(min) >= 0 
-					&& doubleNumber.compareTo(max) < 0 ? doubleNumber : null;
+			return doubleNumber != null && doubleNumber.compareTo(min) >= 0 && doubleNumber.compareTo(max) < 0
+					? doubleNumber
+					: null;
 		});
 	}
 
 	default String readStringPredicate(String prompt, String errorPrompt, Predicate<String> predicate) {
-
 		return (String) readObject(prompt, errorPrompt, str -> {
 			return predicate.test(str) ? str : null;
 		});
@@ -103,7 +104,6 @@ public interface InputOutput {
 		}
 		return date;
 	}
-		
 
 	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from, LocalDate to) {
 		return (LocalDate) readObject(prompt, errorPrompt, str -> {
@@ -111,7 +111,5 @@ public interface InputOutput {
 			return date != null && date.compareTo(from) > 0 && date.compareTo(to) < 0 ? date : null;
 		});
 	}
-
-	
 
 }
