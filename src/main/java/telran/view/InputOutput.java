@@ -1,6 +1,8 @@
 package telran.view;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,6 +24,10 @@ public interface InputOutput {
 			running = false;
 			try {
 				res = mapper.apply(str);
+				if (res == null) {
+					writeLine(errorPrompt);
+					running = true;
+				}
 			} catch (RuntimeException e) {
 				writeLine(errorPrompt + " " + e.getMessage());
 				running = true;
@@ -37,55 +43,75 @@ public interface InputOutput {
 	 * @param errorPrompt
 	 * @return Integer number
 	 */
-	default Integer readInt(String prompt, String errorPrompt) {
-		// TODO
-		// Entered string must be a number otherwise, errorPrompt with cycle
-		return null;
-
+	default Integer readInt(String prompt, String errorPrompt, Predicate<String> predicate) {
+		return (Integer) readObject(prompt, errorPrompt, str -> {
+			return predicate.test(str) ? Integer.parseInt(str) : null;
+		});
 	}
 
 	default Long readLong(String prompt, String errorPrompt) {
-		// TODO
-		// Entered string must be a number otherwise, errorPrompt with cycle
-		return null;
+	
+		return (Long) readObject(prompt, errorPrompt, str -> {
+			Long longNumber = Long.parseLong(str);
+			return longNumber;});
 
 	}
 
 	default Double readDouble(String prompt, String errorPrompt) {
-		// TODO
-		// Entered string must be a number otherwise, errorPrompt with cycle
-		return null;
+		return (Double) readObject(prompt, errorPrompt, str -> {
+			Double doubleNumber = Double.parseDouble(str);
+			return doubleNumber;});
 
 	}
 
 	default Double readNumberRange(String prompt, String errorPrompt, double min, double max) {
-		// TODO
-		// Entered string must be a number in range (min <= number < max) otherwise,
-		// errorPrompt with cycle
-		return null;
+		return (Double) readObject(prompt, errorPrompt, str -> {
+			Double doubleNumber = Double.parseDouble(str);
+			return doubleNumber != null 
+					&& doubleNumber.compareTo(min) >= 0 
+					&& doubleNumber.compareTo(max) < 0 ? doubleNumber : null;
+		});
 	}
-	default String readStringPredicate(String prompt, String errorPrompt,
-			Predicate<String> predicate) {
-		//TODO
-		//Entered String must match a given predicate
-		return null;
+
+	default String readStringPredicate(String prompt, String errorPrompt, Predicate<String> predicate) {
+
+		return (String) readObject(prompt, errorPrompt, str -> {
+			return predicate.test(str) ? str : null;
+		});
 	}
-	default String readStringOptions(String prompt, String errorPrompt,
-			HashSet<String> options) {
-		//TODO
-		//Entered String must be one out of a given options
-		return null;
+
+	default String readStringOptions(String prompt, String errorPrompt, HashSet<String> options) {
+		return (String) readObject(prompt, errorPrompt, str -> {
+			return options.contains(str) ? str : null;
+		});
 	}
+
 	default LocalDate readIsoDate(String prompt, String errorPrompt) {
-		//TODO
-		//Entered String must be a LocalDate in format (yyyy-mm-dd)
-		return null;
+		return (LocalDate) readObject(prompt, errorPrompt, str -> {
+			LocalDate date = dateFormatCheck(str);
+			return date;
+		});
 	}
-	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from,
-			LocalDate to) {
-		//Entered String must be a LocalDate in format (yyyy-mm-dd) in the (from, to)(after from and before to)
-		return null;
+
+	private LocalDate dateFormatCheck(String str) {
+		LocalDate date;
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		try {
+			date = LocalDate.parse(str, formatter);
+		} catch (DateTimeParseException e) {
+			date = null;
+		}
+		return date;
 	}
+		
+
+	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from, LocalDate to) {
+		return (LocalDate) readObject(prompt, errorPrompt, str -> {
+			LocalDate date = dateFormatCheck(str);
+			return date != null && date.compareTo(from) > 0 && date.compareTo(to) < 0 ? date : null;
+		});
+	}
+
 	
 
 }
