@@ -24,10 +24,6 @@ public interface InputOutput {
 			running = false;
 			try {
 				res = mapper.apply(str);
-				if (res == null) {
-					writeLine(errorPrompt);
-					running = true;
-				}
 			} catch (RuntimeException e) {
 				writeLine(errorPrompt + " " + e.getMessage());
 				running = true;
@@ -45,7 +41,10 @@ public interface InputOutput {
 	 */
 	default Integer readInt(String prompt, String errorPrompt, Predicate<String> predicate) {
 		return (Integer) readObject(prompt, errorPrompt, str -> {
-			return predicate.test(str) ? Integer.parseInt(str) : null;
+			if(!predicate.test(str)) {
+				throw new RuntimeException("");
+			}
+			return Integer.parseInt(str);
 		});
 	}
 
@@ -68,22 +67,32 @@ public interface InputOutput {
 
 	default Double readNumberRange(String prompt, String errorPrompt, double min, double max) {
 		return (Double) readObject(prompt, errorPrompt, str -> {
-			Double doubleNumber = Double.parseDouble(str);
-			return doubleNumber != null && doubleNumber.compareTo(min) >= 0 && doubleNumber.compareTo(max) < 0
-					? doubleNumber
-					: null;
+				Double doubleNumber = Double.parseDouble(str);
+				if(doubleNumber == null
+						|| doubleNumber.compareTo(min) < 0 
+						|| doubleNumber.compareTo(max) >= 0) {
+					throw new RuntimeException("");
+				}
+				return doubleNumber;
 		});
 	}
 
 	default String readStringPredicate(String prompt, String errorPrompt, Predicate<String> predicate) {
+		
 		return (String) readObject(prompt, errorPrompt, str -> {
-			return predicate.test(str) ? str : null;
-		});
+			if(!predicate.test(str)) {
+				throw new RuntimeException("");
+			}
+			return str;
+			});
 	}
 
 	default String readStringOptions(String prompt, String errorPrompt, HashSet<String> options) {
 		return (String) readObject(prompt, errorPrompt, str -> {
-			return options.contains(str) ? str : null;
+			if(!options.contains(str)) {
+				throw new RuntimeException("");
+			}
+			return str;
 		});
 	}
 
@@ -100,15 +109,22 @@ public interface InputOutput {
 		try {
 			date = LocalDate.parse(str, formatter);
 		} catch (DateTimeParseException e) {
-			date = null;
+			throw new RuntimeException("Incorrect date format");
 		}
+		
 		return date;
 	}
 
 	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from, LocalDate to) {
 		return (LocalDate) readObject(prompt, errorPrompt, str -> {
 			LocalDate date = dateFormatCheck(str);
-			return date != null && date.compareTo(from) > 0 && date.compareTo(to) < 0 ? date : null;
+			if(date == null) {
+				throw new RuntimeException("Incorrect date format");
+			}
+			if(date.compareTo(from) < 0 || date.compareTo(to) > 0) {
+				throw new RuntimeException("Date is greater than current date");
+			}
+			return date;
 		});
 	}
 

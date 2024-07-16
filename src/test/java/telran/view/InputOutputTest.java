@@ -26,24 +26,25 @@ class InputOutputTest {
 	void readUserByFields() {
 
 		String username = io.readStringPredicate(
-				"Enter username (at least 6 letters, first capital, others in lower case)", "Wrong name format",
+				"Enter username (at least 6 letters, first capital, others in lower case)", "Incorrect name format",
 				s -> s.matches("^[A-Z][a-z]{5,}$"));
 		io.writeLine(username);
 		String password = io.readStringPredicate(
-				"Enter pass (at least 8 letters, one capital, one digit, one special symbol)", "Wrong password format",
+				"Enter pass (at least 8 letters, one capital, one digit, one special symbol)", "Incorrect password format",
 				s -> s.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[#\\$*&%]).{8,}$"));
 		io.writeLine(password);
 
 		String mobile = io.readStringPredicate(
-				"Enter mobile phone number (Israel)", "Wrong number format",
+				"Enter mobile phone number (Israel)", "Incorrect number format",
 				s -> s.matches("(\\+972-?|0)5\\d-?(\\d{3}-\\d{2}-|\\d{2}-?\\d{3}-?)\\d{2}"));
 		io.writeLine(mobile);
 		
-		Integer logins = io.readInt("Enter number of logins", "Number should be greater then 0", s -> s.matches("^[1-9]\\d*$"));
+		Integer logins = io.readInt("Enter number of logins"
+				, "Number should be greater then 0", s -> s.matches("^[1-9]\\d*$"));
 		io.writeLine(logins);
 		
 		LocalDate dateLastLogin = io.readIsoDateRange("Enter last login date", 
-				"Date provided is greater than a current one", 
+				"Incorrect date: ", 
 				LocalDate.of(0, 1, 1), LocalDate.now());
 		io.writeLine(dateLastLogin);
 
@@ -83,5 +84,6 @@ class InputOutputTest {
 		Double doubleNumber = io.readNumberRange("Enter a number (range -1 - 100)", "Enter a -1 <= number < 100 ", -1, 100);
 		io.writeLine(doubleNumber);
 	}
+
 
 }
